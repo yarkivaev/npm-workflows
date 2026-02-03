@@ -7,12 +7,17 @@ on:
         description: Node.js version
         type: string
         default: '22'
+      lint:
+        description: Run linting
+        type: boolean
+        default: true
 
 jobs:
   check-version:
     uses: yarkivaev/npm-workflows/.github/workflows/check-version.yml@main
 
   lint:
+    if: ${{ inputs.lint }}
     uses: yarkivaev/npm-workflows/.github/workflows/lint.yml@main
     with:
       node-version: ${{ inputs.node-version }}

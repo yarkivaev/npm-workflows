@@ -7,6 +7,10 @@ on:
         description: Node.js version
         type: string
         default: '22'
+      lint:
+        description: Run linting
+        type: boolean
+        default: true
 
 jobs:
   check-version:
@@ -14,7 +18,7 @@ jobs:
 
   lint:
     needs: check-version
-    if: needs.check-version.outputs.should_release == 'true'
+    if: ${{ inputs.lint && needs.check-version.outputs.should_release == 'true' }}
     uses: yarkivaev/npm-workflows/.github/workflows/lint.yml@main
     with:
       node-version: ${{ inputs.node-version }}
@@ -28,7 +32,7 @@ jobs:
 
   publish:
     needs: [check-version, lint, test]
-    if: needs.check-version.outputs.should_release == 'true'
+    if: ${{ always() && needs.check-version.outputs.should_release == 'true' && needs.test.result == 'success' && (needs.lint.result == 'success' || needs.lint.result == 'skipped') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

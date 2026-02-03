@@ -30,27 +30,21 @@ jobs:
     with:
       node-version: ${{ inputs.node-version }}
 
-  publish:
+  tag:
     needs: [check-version, lint, test]
     if: ${{ always() && needs.check-version.outputs.should_release == 'true' && needs.test.result == 'success' && (needs.lint.result == 'success' || needs.lint.result == 'skipped') }}
-    runs-on: ubuntu-latest
+    uses: yarkivaev/npm-workflows/.github/workflows/tag.yml@main
+    with:
+      version: ${{ needs.check-version.outputs.version }}
     permissions:
       contents: write
+
+  publish:
+    needs: [check-version, tag]
+    if: ${{ always() && needs.tag.result == 'success' }}
+    uses: yarkivaev/npm-workflows/.github/workflows/publish.yml@main
+    with:
+      node-version: ${{ inputs.node-version }}
+    permissions:
+      contents: read
       id-token: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ inputs.node-version }}
-          cache: 'npm'
-      - run: npm install -g npm@latest
-      - run: npm ci
-      - name: Create tag
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git tag -a "v${{ needs.check-version.outputs.version }}" -m "Release v${{ needs.check-version.outputs.version }}"
-          git push origin "v${{ needs.check-version.outputs.version }}"
-      - run: npm publish --access public

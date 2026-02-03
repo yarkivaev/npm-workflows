@@ -9,16 +9,15 @@ on:
         default: '22'
 
 jobs:
+  check-version:
+    uses: yarkivaev/npm-workflows/.github/workflows/check-version.yml@main
+
+  lint:
+    uses: yarkivaev/npm-workflows/.github/workflows/lint.yml@main
+    with:
+      node-version: ${{ inputs.node-version }}
+
   test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ inputs.node-version }}
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run lint
-      - run: npm test
+    uses: yarkivaev/npm-workflows/.github/workflows/test.yml@main
+    with:
+      node-version: ${{ inputs.node-version }}

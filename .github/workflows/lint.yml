@@ -7,15 +7,23 @@ on:
         description: Node.js version
         type: string
         default: '22'
+      working-directory:
+        description: Working directory for the package
+        type: string
+        default: '.'
 
 jobs:
   lint:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           cache: 'npm'
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
       - run: npm ci
       - run: npm run lint

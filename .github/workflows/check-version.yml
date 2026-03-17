@@ -2,6 +2,11 @@ name: Check Version
 
 on:
   workflow_call:
+    inputs:
+      working-directory:
+        description: Working directory for the package
+        type: string
+        default: '.'
     outputs:
       version:
         description: Version from package.json
@@ -16,6 +21,9 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       should_release: ${{ steps.check.outputs.should_release }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
     steps:
       - uses: actions/checkout@v4
         with:

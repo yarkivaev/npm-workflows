@@ -11,10 +11,16 @@ on:
         description: Run linting
         type: boolean
         default: true
+      working-directory:
+        description: Working directory for the package
+        type: string
+        default: '.'
 
 jobs:
   check-version:
     uses: yarkivaev/npm-workflows/.github/workflows/check-version.yml@main
+    with:
+      working-directory: ${{ inputs.working-directory }}
 
   lint:
     needs: check-version
@@ -22,6 +28,7 @@ jobs:
     uses: yarkivaev/npm-workflows/.github/workflows/lint.yml@main
     with:
       node-version: ${{ inputs.node-version }}
+      working-directory: ${{ inputs.working-directory }}
 
   test:
     needs: check-version
@@ -29,6 +36,7 @@ jobs:
     uses: yarkivaev/npm-workflows/.github/workflows/test.yml@main
     with:
       node-version: ${{ inputs.node-version }}
+      working-directory: ${{ inputs.working-directory }}
 
   tag:
     needs: [check-version, lint, test]
@@ -45,6 +53,7 @@ jobs:
     uses: yarkivaev/npm-workflows/.github/workflows/publish.yml@main
     with:
       node-version: ${{ inputs.node-version }}
+      working-directory: ${{ inputs.working-directory }}
     permissions:
       contents: read
       id-token: write
